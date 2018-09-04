@@ -117,7 +117,7 @@ void loop() {
 
   if (millis() >= timer) {
     timer += 1000;
-    sevseg.setNumber(T1, 2);
+    sevseg.setNumber(T1*100, 0);
   }
 
   sevseg.refreshDisplay();
