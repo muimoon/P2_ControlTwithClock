@@ -89,7 +89,7 @@ void loop() {
 
 
     }
-    else if (Now_Hour > onoffTimes[SmallAirC][OFFTIME]) {
+    else if (Now_Hour > =onoffTimes[SmallAirC][OFFTIME]) {
       if (Opentime == true) {
         irsend.sendNEC(0x20DF20DF, 32);
         Opentime = false;
