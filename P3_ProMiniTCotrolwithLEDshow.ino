@@ -11,15 +11,14 @@ DS1302 rtc(5, 6, 7); // RST, DAT, CLK
 int ThermistorPin = 0; //A0
 int Airswitch = 3;
 const int SmallAirC = 0;
-const int Fan = 1;
 
-int Fanswitch = 4;
 int TLimit = 30;
 
 float T1;
 
 boolean Opentime = false;
 int Now_Hour;
+int Now_Min;
 
 const int NUMBEROFVALVES = 3;
 const int NUMBEROFTIMES = 2;
@@ -47,16 +46,17 @@ void setup() {
   // rtc.writeProtect(true);
 
   byte numDigits = 4;
-  byte digitPins[] = {10, 11, 12};
+  byte digitPins[] = {10, 11, 12, 1};
   byte segmentPins[] = {9, 2, 13, A3, A2, 8, A1, 4};
   bool resistorsOnSegments = true;
   byte hardwareConfig = COMMON_CATHODE;
 
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
+  sevseg.setBrightness(50);
 
 
   valvePinNumbers[0] = Airswitch;
-  valvePinNumbers[1] = Fanswitch;
+  //  valvePinNumbers[1] = Fanswitch;
 
 
 }
@@ -68,13 +68,13 @@ void loop() {
   if (millis() >= timer) {
     timer += 1000;
     getHourTime();
-    sevseg.setNumber(Now_Hour*10, 1);
+    sevseg.setNumber(Now_Hour * 100 + Now_Min , 1);
   }
 
   sevseg.refreshDisplay();
 
   if (millis() >= timer) {
-    timer += 5000;
+    timer += 1000;
     getHourTime();
     getTemperature();
 
@@ -89,7 +89,7 @@ void loop() {
 
 
     }
-    else if (Now_Hour > =onoffTimes[SmallAirC][OFFTIME]) {
+    else if (Now_Hour >= onoffTimes[SmallAirC][OFFTIME]) {
       if (Opentime == true) {
         irsend.sendNEC(0x20DF20DF, 32);
         Opentime = false;
@@ -97,18 +97,18 @@ void loop() {
 
     }
     else {
-        //digitalWrite(Airswitch, HIGH);
+      //digitalWrite(Airswitch, HIGH);
 
     }
 
     for (int valve = 1; valve < NUMBEROFVALVES; valve++) {
       if ( (Now_Hour >= onoffTimes[valve][ONTIME])
            && (Now_Hour < onoffTimes[valve][OFFTIME]) ) {
-        digitalWrite(Fanswitch, HIGH);
+        //digitalWrite(Fanswitch, HIGH);
 
       }
       else {
-        digitalWrite(Fanswitch, LOW);
+        //digitalWrite(Fanswitch, LOW);
 
       }
     }
@@ -119,19 +119,24 @@ void loop() {
     timer += 1000;
     sevseg.setNumber(T1, 2);
   }
+
   sevseg.refreshDisplay();
+
 
 }
 
 void getHourTime() {
 
   String Now_Hour_s = rtc.getTimeStr();
+  String Now_Hour_m = rtc.getTimeStr();
   String Hour_temp1;
 
   Hour_temp1 = Now_Hour_s.charAt(0);
   Now_Hour_s = Hour_temp1 + Now_Hour_s.charAt(1);
   Now_Hour = Now_Hour_s.toInt();
-
+  Hour_temp1 = Now_Hour_m.charAt(3);
+  Now_Hour_m = Hour_temp1 + Now_Hour_m.charAt(4);
+  Now_Min = Now_Hour_m.toInt();
 }
 
 void getTemperature() {
@@ -147,6 +152,5 @@ void getTemperature() {
   T1 = (1.0 / (c1 + c2 * logR2 + c3 * logR2 * logR2 * logR2));
   T1 = T1 - 273.15;
 }
-
 
 
