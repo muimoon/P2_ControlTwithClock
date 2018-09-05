@@ -12,11 +12,11 @@ int ThermistorPin = 0; //A0
 int Airswitch = 3;
 const int SmallAirC = 0;
 
-int TLimit = 30;
+int TLimit = 30;//Setting control Temperature
 
-float T1;
+float T1;//Testing Temperature
 
-boolean Opentime = false;
+boolean Opentime = false;//flag to remember Condition open or not
 int Now_Hour;
 int Now_Min;
 
@@ -36,7 +36,7 @@ void setup() {
 
   pinMode(Airswitch, OUTPUT);
 
-  Opentime = false;
+  Opentime = false; //Original Condition state
 
   //rtc.halt(false);
   //rtc.writeProtect(false);
@@ -46,7 +46,7 @@ void setup() {
   // rtc.writeProtect(true);
 
   byte numDigits = 4;
-  byte digitPins[] = {10, 11, 12, 1};
+  byte digitPins[] = {10, 11, 12, 1};//not enough pinout for digital 4 LED, so Tx to be used
   byte segmentPins[] = {9, 2, 13, A3, A2, 8, A1, 4};
   bool resistorsOnSegments = true;
   byte hardwareConfig = COMMON_CATHODE;
@@ -55,8 +55,8 @@ void setup() {
   sevseg.setBrightness(50);
 
 
-  valvePinNumbers[0] = Airswitch;
-  //  valvePinNumbers[1] = Fanswitch;
+  //valvePinNumbers[0] = Airswitch;
+  // valvePinNumbers[1] = Fanswitch;
 
 
 }
@@ -68,9 +68,9 @@ void loop() {
   if (millis() >= timer) {
     timer += 1000;
     getHourTime();
-    sevseg.setNumber(Now_Hour * 100 + Now_Min , 1);
+    sevseg.setNumber(Now_Hour * 100 + Now_Min , 1);// (hour*100+min) to show in LED, but : can't show, need to recheck
   }
-
+//delay(1000); must be delete, otherwise the digital will be shown one bit by one bit.
   sevseg.refreshDisplay();
 
   if (millis() >= timer) {
@@ -84,51 +84,28 @@ void loop() {
         irsend.sendNEC(0x20DF20DF, 32);
         //digitalWrite(Airswitch, HIGH);
         Opentime = true;
-
       }
-
-
     }
+    
     else if (Now_Hour >= onoffTimes[SmallAirC][OFFTIME]) {
       if (Opentime == true) {
         irsend.sendNEC(0x20DF20DF, 32);
         Opentime = false;
       }
-
     }
-    else {
-      //digitalWrite(Airswitch, HIGH);
-
-    }
-
-    for (int valve = 1; valve < NUMBEROFVALVES; valve++) {
-      if ( (Now_Hour >= onoffTimes[valve][ONTIME])
-           && (Now_Hour < onoffTimes[valve][OFFTIME]) ) {
-        //digitalWrite(Fanswitch, HIGH);
-
-      }
-      else {
-        //digitalWrite(Fanswitch, LOW);
-
-      }
-    }
-
   }
 
   if (millis() >= timer) {
     timer += 1000;
     sevseg.setNumber(T1*100, 0);
   }
-
   sevseg.refreshDisplay();
-
-
 }
 
 void getHourTime() {
 
   String Now_Hour_s = rtc.getTimeStr();
-  String Now_Hour_m = rtc.getTimeStr();
+  String Now_Hour_m = rtc.getTimeStr();//00：00：00 time fomat
   String Hour_temp1;
 
   Hour_temp1 = Now_Hour_s.charAt(0);
