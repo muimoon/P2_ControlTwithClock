@@ -25,3 +25,11 @@ Consider there are not enough digital pins for 4 bits LED, only 3 bits are worki
 * 3 is kept for IR.
 
   `irsend.sendNEC(0x20DF20DF, 32)`
+  
+# P4
+
+  * Folder created in local
+  
+  * extra A4 added to control remote LED
+  
+  * DS1302 seperated
