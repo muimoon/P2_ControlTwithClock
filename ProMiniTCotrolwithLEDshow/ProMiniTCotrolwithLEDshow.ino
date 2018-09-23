@@ -17,6 +17,7 @@ int TLimit = 30;//Setting control Temperature
 float T1;//Testing Temperature
 
 boolean Opentime = false;//flag to remember Condition open or not
+boolean lightOpenFlag = false; //flang for light Status
 int Now_Hour;
 int Now_Min;
 
@@ -41,9 +42,9 @@ void setup() {
   //rtc.halt(false);
   //rtc.writeProtect(false);
   //rtc.setDOW(SATURDAY);
-  //rtc.setTime(19, 55, 30);
-  //rtc.setDate(25, 8, 2018);
-  // rtc.writeProtect(true);
+  //rtc.setTime(19, 28, 30);
+  //rtc.setDate(23, 9, 2018);
+  //rtc.writeProtect(true);
 
   byte numDigits = 4;
   byte digitPins[] = {10, 11, 12, 1};//not enough pinout for digital 4 LED, so Tx to be used
@@ -54,7 +55,7 @@ void setup() {
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
   sevseg.setBrightness(50);
 
-
+  //irsend.sendNEC(0x771BCA9F,HEX);
   //valvePinNumbers[0] = Airswitch;
   // valvePinNumbers[1] = Fanswitch;
 
@@ -70,14 +71,14 @@ void loop() {
     getHourTime();
     sevseg.setNumber(Now_Hour * 100 + Now_Min , 1);// (hour*100+min) to show in LED, but : can't show, need to recheck
   }
-//delay(1000); must be delete, otherwise the digital will be shown one bit by one bit.
+  //delay(1000); must be delete, otherwise the digital will be shown one bit by one bit.
   sevseg.refreshDisplay();
 
   if (millis() >= timer) {
     timer += 1000;
     getHourTime();
     getTemperature();
-
+    getLightSwitch();
     if ((T1 > TLimit) && (Now_Hour >= onoffTimes[SmallAirC][ONTIME])
         && (Now_Hour < onoffTimes[SmallAirC][OFFTIME]) ) {
       if (Opentime == false) {
@@ -86,7 +87,7 @@ void loop() {
         Opentime = true;
       }
     }
-    
+
     else if (Now_Hour >= onoffTimes[SmallAirC][OFFTIME]) {
       if (Opentime == true) {
         irsend.sendNEC(0x20DF20DF, 32);
@@ -97,7 +98,7 @@ void loop() {
 
   if (millis() >= timer) {
     timer += 1000;
-    sevseg.setNumber(T1*100, 0);
+    sevseg.setNumber(T1 * 100, 0);
   }
   sevseg.refreshDisplay();
 }
@@ -128,6 +129,14 @@ void getTemperature() {
   logR2 = log(R2);
   T1 = (1.0 / (c1 + c2 * logR2 + c3 * logR2 * logR2 * logR2));
   T1 = T1 - 273.15;
+}
+
+void getLightSwitch() {
+  if  (analogRead(A4) < 10) {
+    irsend.sendNEC(0xAA5511EE, 32);
+    delay(100);
+    //lightOpenFlag=true;
+  }
 }
 
 
