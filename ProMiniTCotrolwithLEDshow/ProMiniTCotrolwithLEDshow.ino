@@ -6,7 +6,7 @@
 
 SevSeg sevseg;
 IRsend irsend;
-DS1302 rtc(5, 6, 7); // RST, DAT, CLK
+DS1302 rtc(7, 6, 5); // RST, DAT, CLK 
 
 int ThermistorPin = 0; //A0
 int Airswitch = 3;
@@ -48,12 +48,14 @@ void setup() {
 
   byte numDigits = 4;
   byte digitPins[] = {10, 11, 12, 1};//not enough pinout for digital 4 LED, so Tx to be used
-  byte segmentPins[] = {9, 2, 13, A3, A2, 8, A1, 4};
+  byte segmentPins[] = {8, A2, 13, 4, 2, 9, A1, A4};
   bool resistorsOnSegments = true;
   byte hardwareConfig = COMMON_CATHODE;
 
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
   sevseg.setBrightness(50);
+
+  pinMode(A4,INPUT_PULLUP); //added for PCB
 
   //irsend.sendNEC(0x771BCA9F,HEX);
   //valvePinNumbers[0] = Airswitch;
@@ -132,7 +134,7 @@ void getTemperature() {
 }
 
 void getLightSwitch() {
-  if  (analogRead(A4) < 10) {
+  if  (analogRead(A3) < 10) {
     irsend.sendNEC(0xAA5511EE, 32);
     delay(100);
     //lightOpenFlag=true;
