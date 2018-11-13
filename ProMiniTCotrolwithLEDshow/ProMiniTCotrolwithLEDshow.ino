@@ -1,3 +1,4 @@
+
 #include <IRremote.h>
 #include <stdio.h>
 #include <DS1302.h>
@@ -9,7 +10,7 @@ IRsend irsend;
 DS1302 rtc(7, 6, 5); // RST, DAT, CLK 
 
 int ThermistorPin = 0; //A0
-int Airswitch = 3;
+//int Airswitch = 3;
 const int SmallAirC = 0;
 
 int TLimit = 30;//Setting control Temperature
@@ -35,27 +36,27 @@ const int OFFTIME = 1;
 
 void setup() {
 
-  pinMode(Airswitch, OUTPUT);
+  //pinMode(Airswitch, OUTPUT);
 
   Opentime = false; //Original Condition state
 
   //rtc.halt(false);
   //rtc.writeProtect(false);
-  //rtc.setDOW(SATURDAY);
-  //rtc.setTime(19, 28, 30);
-  //rtc.setDate(23, 9, 2018);
+  //rtc.setDOW(TUESDAY);
+  //rtc.setTime(17, 05, 30);
+  //rtc.setDate(13, 11, 2018);
   //rtc.writeProtect(true);
 
   byte numDigits = 4;
   byte digitPins[] = {10, 11, 12, 1};//not enough pinout for digital 4 LED, so Tx to be used
-  byte segmentPins[] = {8, A2, 13, 4, 2, 9, A1, A4};
+  byte segmentPins[] = {9, A2, 13, 4, 2, 8, A1, 0};
   bool resistorsOnSegments = true;
   byte hardwareConfig = COMMON_CATHODE;
 
   sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
   sevseg.setBrightness(50);
 
-  pinMode(A4,INPUT_PULLUP); //added for PCB
+  pinMode(A3,INPUT_PULLUP); //added for PCB
 
   //irsend.sendNEC(0x771BCA9F,HEX);
   //valvePinNumbers[0] = Airswitch;
@@ -134,7 +135,7 @@ void getTemperature() {
 }
 
 void getLightSwitch() {
-  if  (analogRead(A3) < 10) {
+  if  (analogRead(A3) < 100) {
     irsend.sendNEC(0xAA5511EE, 32);
     delay(100);
     //lightOpenFlag=true;
