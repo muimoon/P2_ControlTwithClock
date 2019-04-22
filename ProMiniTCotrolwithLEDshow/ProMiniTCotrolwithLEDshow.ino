@@ -70,48 +70,56 @@ void setup()
 
 void loop()
 {
+	char tempString[10]; //Used for sprintf
 	static unsigned long timer = millis();
 	if (millis() >= timer)
 	{
 		timer += 1000;
 		getHourTime();
-		sevseg.setNumber(Now_Hour * 100 + Now_Min, 1); // show time
-		// (hour*100+min) to show in LED, but : can't show, need to recheck
+		//sevseg.setNumber(Now_Hour * 100 + Now_Min, 1); // show time
+		sprintf(tempString, "%02d%02d", Now_Hour, Now_Min);
+		sevseg.DisplayString(tempString, 3);
+		
 	}
-	// delay(1000);
-	// must be delete, otherwise the digital will be shown one bit by one bit.
-	sevseg.refreshDisplay();
-	if (millis() >= timer)
-	{
-		timer += 1000;
-		getHourTime();
-		getTemperature();
-		getLightSwitch();
-		if ((T1 > TLimit) && (Now_Hour >= onoffTimes[SmallAirC][ONTIME])
-			&& (Now_Hour < onoffTimes[SmallAirC][OFFTIME]))
+	// (hour*100+min) to show in LED, but : can't show, need to recheck
+}
+
+// delay(1000);
+// must be delete, otherwise the digital will be shown one bit by one bit.
+sevseg.refreshDisplay();
+if (millis() >= timer)
+{
+	timer += 1000;
+	getHourTime();
+	getTemperature();
+	getLightSwitch();
+	if ((T1 > TLimit) && (Now_Hour >= onoffTimes[SmallAirC][ONTIME])
+		&& (Now_Hour < onoffTimes[SmallAirC][OFFTIME]))
+		{
+			if (Opentime == false)
 			{
-				if (Opentime == false)
-				{
-					irsend.sendNEC(0x20DF20DF, 32);
-					Opentime = true;
-				}
+				irsend.sendNEC(0x20DF20DF, 32);
+				Opentime = true;
 			}
-		else
-			if (Now_Hour >= onoffTimes[SmallAirC][OFFTIME])
+		}
+	else
+		if (Now_Hour >= onoffTimes[SmallAirC][OFFTIME])
+		{
+			if (Opentime == true)
 			{
-				if (Opentime == true)
-				{
-					irsend.sendNEC(0x20DF20DF, 32);
-					Opentime = false;
-				}
+				irsend.sendNEC(0x20DF20DF, 32);
+				Opentime = false;
 			}
-	}
-	if (millis() >= timer)
-	{
-		timer += 1000;
-		sevseg.setNumber(T1 * 100, 0); // show temperature
-	}
-	sevseg.refreshDisplay();
+		}
+}
+
+if (millis() >= timer)
+{
+	timer += 1000;
+	sevseg.setNumber(T1 * 100, 0); // show temperature
+}
+
+sevseg.refreshDisplay();
 }
 
 void getHourTime()
